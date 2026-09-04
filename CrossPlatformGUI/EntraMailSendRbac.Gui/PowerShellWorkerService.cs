@@ -11,6 +11,10 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
     private readonly SemaphoreSlim _writeLock = new(1, 1);
     private Process? _process;
 
+    public string Language { get; set; } = "de";
+
+    private string T(string de, string en) => Language == "en" ? en : de;
+
     public event Action<string>? LogReceived;
     public event Action<WorkerProgress>? ProgressReceived;
 
@@ -20,7 +24,7 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
 
         var workerPath = Path.Combine(AppContext.BaseDirectory, "Backend", "ExchangeWorker.ps1");
         if (!File.Exists(workerPath))
-            throw new FileNotFoundException("Exchange PowerShell Worker wurde nicht gefunden.", workerPath);
+            throw new FileNotFoundException(T("Exchange PowerShell Worker wurde nicht gefunden.", "Exchange PowerShell worker was not found."), workerPath);
 
         var startInfo = new ProcessStartInfo
         {
@@ -39,16 +43,16 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
         try
         {
             _process = Process.Start(startInfo)
-                ?? throw new InvalidOperationException("PowerShell Worker konnte nicht gestartet werden.");
+                ?? throw new InvalidOperationException(T("PowerShell Worker konnte nicht gestartet werden.", "PowerShell worker could not be started."));
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException(
-                "PowerShell 7 (pwsh) wurde nicht gefunden. Bitte PowerShell 7.4 oder neuer installieren und sicherstellen, dass 'pwsh' im PATH verfügbar ist.", ex);
+                T("PowerShell 7 (pwsh) wurde nicht gefunden. Bitte PowerShell 7.4 oder neuer installieren und sicherstellen, dass 'pwsh' im PATH verfügbar ist.", "PowerShell 7 (pwsh) was not found. Please install PowerShell 7.4 or newer and make sure 'pwsh' is available in PATH."), ex);
         }
 
         _process.EnableRaisingEvents = true;
-        _process.Exited += (_, _) => FailAllPending("Der PowerShell Worker wurde unerwartet beendet.");
+        _process.Exited += (_, _) => FailAllPending(T("Der PowerShell Worker wurde unerwartet beendet.", "The PowerShell worker exited unexpectedly."));
 
         _ = Task.Run(() => ReadStdOutAsync(_process));
         _ = Task.Run(() => ReadStdErrAsync(_process));
@@ -60,12 +64,12 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
     {
         await StartAsync();
         if (_process is null || _process.HasExited)
-            throw new InvalidOperationException("PowerShell Worker ist nicht verfügbar.");
+            throw new InvalidOperationException(T("PowerShell Worker ist nicht verfügbar.", "PowerShell worker is not available."));
 
         var id = Guid.NewGuid().ToString("N");
         var tcs = new TaskCompletionSource<WorkerResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!_pending.TryAdd(id, tcs))
-            throw new InvalidOperationException("Interner Request konnte nicht registriert werden.");
+            throw new InvalidOperationException(T("Interner Request konnte nicht registriert werden.", "Internal request could not be registered."));
 
         var payload = JsonSerializer.Serialize(new { id, command, data });
 
@@ -89,7 +93,7 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
         using var registration = timeoutCts.Token.Register(() =>
         {
             if (_pending.TryRemove(id, out var pending))
-                pending.TrySetException(new TimeoutException($"Zeitüberschreitung bei '{command}'."));
+                pending.TrySetException(new TimeoutException(T($"Zeitüberschreitung bei '{command}'.", $"Timeout while executing '{command}'.")));
         });
 
         return await tcs.Task;
@@ -139,7 +143,7 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
             }
             catch (Exception ex)
             {
-                LogReceived?.Invoke($"Worker-Protokoll konnte nicht gelesen werden: {ex.Message}");
+                LogReceived?.Invoke(T($"Worker-Protokoll konnte nicht gelesen werden: {ex.Message}", $"Worker protocol could not be read: {ex.Message}"));
             }
         }
     }
