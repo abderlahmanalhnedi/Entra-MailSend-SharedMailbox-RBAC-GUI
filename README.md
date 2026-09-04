@@ -1,36 +1,49 @@
-# Entra Mail.Send – Shared Mailbox RBAC GUI
+# Entra Mail.Send – Shared Mailbox RBAC Tool
 
-![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?logo=powershell&logoColor=white)
-![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white)
+![PowerShell](https://img.shields.io/badge/PowerShell-7.4%2B-5391FE?logo=powershell&logoColor=white)
+![Windows GUI](https://img.shields.io/badge/GUI-Windows-0078D6?logo=windows&logoColor=white)
+![Cross Platform CLI](https://img.shields.io/badge/CLI-Windows%20%7C%20macOS%20%7C%20Linux-2ea44f)
 ![Exchange Online](https://img.shields.io/badge/Exchange%20Online-RBAC%20for%20Applications-0078D4)
 
-Eine kleine Windows-GUI für Administratoren, um einer **Microsoft Entra Enterprise Application** die Exchange-Online-Rolle **`Application Mail.Send`** gezielt für **eine einzelne Shared Mailbox** zuzuweisen.
+Ein kleines Admin-Tool, um einer **Microsoft Entra Enterprise Application** die Exchange-Online-Rolle **`Application Mail.Send`** gezielt für **eine einzelne Shared Mailbox** zuzuweisen.
 
-Das Tool verwendet **Exchange Online RBAC for Applications** und soll die Einrichtung so einfach machen, dass dafür keine tieferen PowerShell-Kenntnisse nötig sind.
+Das Repository enthält zwei Varianten:
+
+- **Windows GUI** für eine möglichst einfache Bedienung per Oberfläche
+- **Cross-Platform CLI** für Windows, macOS und Linux
+
+Beide Varianten verwenden **Exchange Online RBAC for Applications** und fragen **kein Admin-Passwort** im Skript ab.
 
 > [!IMPORTANT]
 > Für eine wirksame Einschränkung darf dieselbe App **nicht zusätzlich tenantweit** über Microsoft Entra mit **Microsoft Graph → `Mail.Send (Application)`** berechtigt sein. Entra-Berechtigungen und Exchange Application RBAC wirken additiv.
 
-## Screenshot
+## Screenshot – Windows GUI
 
 ![Entra Mail.Send Shared Mailbox RBAC GUI](docs/images/entra-mail-send-rbac-gui.png)
 
+## Varianten
+
+| Datei | Plattform | PowerShell | Bedienung |
+|---|---|---:|---|
+| `Entra-MailSend-SharedMailbox-RBAC-GUI.ps1` | Windows | Windows PowerShell 5.1 oder PowerShell 7 | Grafische Oberfläche |
+| `Entra-MailSend-SharedMailbox-RBAC-CLI.ps1` | Windows, macOS, Linux | PowerShell 7.4+ | Interaktives Terminal-Menü |
+
 ## Was macht das Tool?
 
-Das Skript führt die benötigten Exchange-Schritte über eine grafische Oberfläche aus:
+Das Tool übernimmt die benötigten Exchange-Schritte und führt den Administrator durch die Einrichtung:
 
-- prüft bzw. installiert das PowerShell-Modul `ExchangeOnlineManagement`
+- prüft bzw. installiert `ExchangeOnlineManagement`
 - verbindet sich per `Connect-ExchangeOnline`
-- nutzt die Microsoft-Anmeldung mit Modern Authentication / MFA
+- verwendet Microsoft Modern Authentication / MFA / Conditional Access
 - fragt **kein Admin-Passwort** im Skript ab
 - prüft, ob die angegebene Mailbox eine Shared Mailbox ist
 - erstellt bei Bedarf den Exchange-Verweis auf den Entra Service Principal
 - erstellt einen Management Scope für genau diese Shared Mailbox
-- weist die Rolle `Application Mail.Send` auf diesen Scope zu
-- prüft die resultierende Exchange-RBAC-Autorisierung mit `Test-ServicePrincipalAuthorization`
-- erkennt zusätzliche Exchange-RBAC-Zuweisungen mit Mail.Send, die den vorgesehenen Scope erweitern könnten
+- weist `Application Mail.Send` auf diesen Scope zu
+- prüft die Autorisierung mit `Test-ServicePrincipalAuthorization`
+- warnt vor zusätzlichen Exchange-RBAC-Zuweisungen, die den Mail.Send-Scope erweitern könnten
 
-## Funktionsweise
+## Architektur
 
 ```text
 Microsoft Entra Enterprise Application
@@ -50,29 +63,31 @@ Microsoft Entra Enterprise Application
 
 ## Voraussetzungen
 
-- Windows
-- Windows PowerShell 5.1 oder PowerShell 7
-- Internetzugriff auf Microsoft 365 und ggf. PowerShell Gallery
 - vorhandene Microsoft Entra App / Enterprise Application
 - vorhandene Shared Mailbox in Exchange Online
-- administratives Konto mit den erforderlichen Exchange-Berechtigungen
-
-Microsoft nennt für das Einrichten von Application RBAC unter anderem:
-
+- Internetzugriff auf Microsoft 365 und ggf. PowerShell Gallery
 - **Exchange Administrator** in Microsoft Entra ID
-- die erforderliche delegierende Exchange-RBAC-Berechtigung; standardmäßig besitzt die Rollengruppe **Organization Management** die Delegierung für die Application-RBAC-Rollen
+- Berechtigung zum Zuweisen der Application-RBAC-Rolle; standardmäßig verfügt die Exchange-Rollengruppe **Organization Management** über die delegierende Zuweisung
 
-## Schnellstart
+### Für die CLI-Version
 
-### 1. Skript starten
+- PowerShell **7.4 oder neuer**
+- Windows, macOS oder unterstütztes Linux
 
-Repository herunterladen oder klonen und anschließend ausführen:
+Das Skript berücksichtigt die Kompatibilität des Exchange-Online-Moduls:
+
+- PowerShell 7.6+ → aktuelle `ExchangeOnlineManagement`-Version
+- PowerShell 7.4 / 7.5 → kompatible Modulversion `3.9.2`
+
+## Schnellstart – Windows GUI
+
+Repository herunterladen bzw. klonen und anschließend in PowerShell ausführen:
 
 ```powershell
 .\Entra-MailSend-SharedMailbox-RBAC-GUI.ps1
 ```
 
-Falls die lokale Execution Policy die Ausführung blockiert, kann für die aktuelle PowerShell-Sitzung beispielsweise Folgendes verwendet werden:
+Falls die lokale Execution Policy die Ausführung blockiert, kann nur für die aktuelle Sitzung beispielsweise Folgendes verwendet werden:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -80,9 +95,44 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
 > [!NOTE]
-> Eine Änderung der systemweiten Execution Policy ist für dieses Tool nicht erforderlich.
+> Eine systemweite Änderung der Execution Policy ist für dieses Tool nicht erforderlich.
 
-### 2. Admin-Konto eintragen
+## Schnellstart – macOS / Linux / Windows CLI
+
+PowerShell 7 starten und in den Repository-Ordner wechseln.
+
+### macOS / Linux
+
+```powershell
+./Entra-MailSend-SharedMailbox-RBAC-CLI.ps1
+```
+
+### Windows mit PowerShell 7
+
+```powershell
+.\Entra-MailSend-SharedMailbox-RBAC-CLI.ps1
+```
+
+Danach erscheint ein einfaches Menü:
+
+```text
+============================================================
+ Entra Mail.Send - Shared Mailbox RBAC CLI
+ Windows | macOS | Linux
+============================================================
+
+[1] Mit Exchange Online verbinden
+[2] App- und Mailbox-Daten eingeben
+[3] Zugriff einrichten
+[4] Zugriff testen
+[5] Aktuelle Eingaben anzeigen
+[6] Verbindung trennen
+[0] Beenden
+```
+
+## Benötigte Daten
+
+### Admin-Konto
 
 Beispiel:
 
@@ -90,22 +140,20 @@ Beispiel:
 admin@contoso.com
 ```
 
-Danach **„Mit Exchange Online verbinden“** auswählen. Passwort, MFA, Passkey oder andere Anmeldeverfahren werden ausschließlich über den Microsoft-Anmeldedialog verarbeitet.
+Die Anmeldung erfolgt über Microsoft. Passwort, MFA, Passkey oder andere Anmeldeverfahren werden nicht vom Skript verarbeitet.
 
-### 3. App-Daten eintragen
+### Application (Client) ID
 
-Benötigt werden:
-
-**Application (Client) ID**  
 Die Application ID der Entra App.
 
-**Enterprise App Object ID**  
+### Enterprise App Object ID
+
 Die Object ID des **Service Principals / der Enterprise Application**.
 
 > [!WARNING]
-> Für die Object ID nicht die Object ID aus **App registrations** verwenden. Benötigt wird die Object ID unter **Entra ID → Enterprise applications → Anwendung**.
+> Nicht die Object ID unter **App registrations** verwenden. Benötigt wird die Object ID unter **Entra ID → Enterprise applications → Anwendung**.
 
-### 4. Shared Mailbox eintragen
+### Shared Mailbox
 
 Beispiel:
 
@@ -113,66 +161,53 @@ Beispiel:
 noreply@contoso.com
 ```
 
-### 5. Sicherheitsbestätigung setzen
+## Sicherheitsbestätigung
 
-Vor der Einrichtung muss bestätigt werden, dass für diese App kein tenantweites:
+Vor der Konfiguration muss bestätigt werden, dass für die App kein tenantweites:
 
 ```text
 Microsoft Graph → Mail.Send (Application)
 ```
 
-in Entra vergeben ist.
+in Entra aktiv ist.
 
-### 6. Zugriff einrichten
+Der Grund: Exchange Application RBAC und separat in Microsoft Entra vergebene Application Permissions werden bei der effektiven Berechtigung zusammengeführt.
 
-Auf **„Zugriff einrichten“** klicken.
+## Zugriff testen
 
-Das Tool erstellt bzw. prüft anschließend automatisch:
+Das Tool verwendet:
 
-```text
-Service Principal
-      ↓
-Management Scope
-      ↓
-Application Mail.Send Role Assignment
-      ↓
-Shared Mailbox
+```powershell
+Test-ServicePrincipalAuthorization
 ```
 
-### 7. Zugriff testen
+Ein erfolgreicher Test zeigt sinngemäß:
 
-Mit **„Zugriff testen“** wird die Exchange-RBAC-Zuweisung geprüft.
+```text
+GRANTED: Application Mail.Send ist fuer sharedmailbox@contoso.com im erwarteten Scope.
+```
 
-Ein erfolgreicher Test wird im Statusfenster als `GRANTED` angezeigt.
+> [!NOTE]
+> `Test-ServicePrincipalAuthorization` prüft Exchange Application RBAC. Separat in Entra erteilte tenantweite API Permissions werden dadurch nicht ausgeschlossen und müssen separat geprüft werden.
 
 ## Sicherheit
 
 Das Tool wurde bewusst so aufgebaut, dass sensible Anmeldedaten nicht selbst verarbeitet werden.
 
-**Es gibt kein Passwortfeld.** Das Skript speichert keine Admin-Kennwörter, Client Secrets oder OAuth-Tokens. Die Anmeldung erfolgt über `Connect-ExchangeOnline` und damit über die von Microsoft bereitgestellte moderne Authentifizierung.
+- kein Passwortfeld
+- keine Speicherung von Admin-Kennwörtern
+- keine Speicherung von Client Secrets
+- keine Speicherung von OAuth-Tokens
+- Anmeldung über `Connect-ExchangeOnline`
+- MFA / Passkeys / Conditional Access bleiben im Microsoft-Anmeldeprozess
 
-Trotzdem gilt: Vor produktivem Einsatz sollte das Skript in einer Testumgebung bzw. mit einer Test-App und Test-Mailbox geprüft werden.
+Vor produktivem Einsatz sollte die Konfiguration trotzdem zuerst mit einer Test-App und Test-Shared-Mailbox geprüft werden.
 
 ## Warum Exchange Online RBAC for Applications?
 
-Exchange Online RBAC for Applications ermöglicht die Zuweisung von Application Permissions mit einem Exchange-Ressourcenbereich. Dadurch kann eine App beispielsweise `Mail.Send` erhalten, ohne diese Berechtigung automatisch für alle Mailboxen der Organisation zu bekommen.
+Exchange Online RBAC for Applications ermöglicht Application Permissions mit einem Exchange-Ressourcenbereich. Dadurch kann eine App beispielsweise `Mail.Send` erhalten, ohne diese Berechtigung für alle Mailboxen der Organisation zu bekommen.
 
-Microsoft beschreibt Application RBAC als Nachfolger der älteren **Application Access Policies**.
-
-## Wichtiger Hinweis zu Entra API Permissions
-
-Exchange Application RBAC und in Microsoft Entra vergebene Application Permissions sind voneinander unabhängig und werden bei der effektiven Autorisierung zusammengeführt.
-
-Wenn also dieselbe App zusätzlich tenantweit folgende Entra-Berechtigung besitzt:
-
-```text
-Microsoft Graph
-└── Mail.Send (Application)
-```
-
-kann der Exchange-RBAC-Scope allein den Zugriff nicht wirksam auf die eine Shared Mailbox begrenzen.
-
-Für einen ausschließlich per Exchange RBAC eingeschränkten `Mail.Send`-Zugriff muss die entsprechende organisationsweite Entra-Zuweisung daher entfernt bzw. nicht erteilt sein.
+Microsoft empfiehlt diese Methode gegenüber den älteren **Application Access Policies** für neue Implementierungen.
 
 ## Was das Tool nicht macht
 
@@ -181,22 +216,34 @@ Das Tool:
 - erstellt keine neue Entra App
 - erstellt kein Client Secret oder Zertifikat
 - konfiguriert keine Anwendung, die Microsoft Graph aufruft
-- entfernt keine vorhandenen Entra API Permissions automatisch
-- löscht keine bestehenden Exchange-RBAC-Konfigurationen automatisch
+- entfernt vorhandene Entra API Permissions nicht automatisch
+- löscht bestehende Exchange-RBAC-Konfigurationen nicht automatisch
 
 Damit bleiben sicherheitsrelevante Änderungen außerhalb des gewünschten Mailbox-Scopes bewusst unter administrativer Kontrolle.
 
 ## Fehlerbehebung
 
+### macOS: Skript wird nicht gefunden
+
+PowerShell führt Dateien aus dem aktuellen Verzeichnis nicht automatisch aus. Deshalb mit `./` starten:
+
+```powershell
+./Entra-MailSend-SharedMailbox-RBAC-CLI.ps1
+```
+
 ### ExchangeOnlineManagement fehlt
 
-Das Tool erkennt ein fehlendes Modul und bietet die Installation für den aktuellen Benutzer an.
+Die CLI bietet die Installation für den aktuellen Benutzer automatisch an.
 
-Alternativ manuell:
+Alternativ:
 
 ```powershell
 Install-Module ExchangeOnlineManagement -Scope CurrentUser
 ```
+
+### Standard-Anmeldung funktioniert nicht
+
+Die CLI bietet nach einem fehlgeschlagenen normalen Login optional eine **Device-Code-Anmeldung** an. Auch dabei werden Kennwort und MFA ausschließlich von Microsoft verarbeitet.
 
 ### Falsche Enterprise App Object ID
 
@@ -204,18 +251,35 @@ Die Object ID muss von der **Enterprise Application / dem Service Principal** st
 
 ### Zugriff funktioniert außerhalb der Shared Mailbox
 
-Prüfen, ob in Entra weiterhin eine organisationsweite `Mail.Send (Application)`-Berechtigung oder eine weitere Exchange-RBAC-Zuweisung vorhanden ist.
+Prüfen, ob:
 
-### Test zeigt noch nicht das erwartete Verhalten
+- in Entra weiterhin `Mail.Send (Application)` tenantweit erteilt ist
+- eine weitere Exchange-RBAC-Zuweisung mit `Application Mail.Send`, `Application Mail Full Access` oder `Application Exchange Full Access` existiert
 
-`Test-ServicePrincipalAuthorization` prüft die Exchange-RBAC-Zuweisung direkt. Änderungen an produktiven Autorisierungspfaden können zusätzlich durch Caching verzögert sichtbar werden.
+### Änderungen wirken noch nicht in der Anwendung
+
+Microsoft weist darauf hin, dass Änderungen an Application-RBAC-Berechtigungen durch Caching verzögert wirksam werden können. `Test-ServicePrincipalAuthorization` umgeht diesen Cache beim Test.
+
+## Repository-Struktur
+
+```text
+Entra-MailSend-SharedMailbox-RBAC-GUI/
+│
+├── Entra-MailSend-SharedMailbox-RBAC-GUI.ps1
+├── Entra-MailSend-SharedMailbox-RBAC-CLI.ps1
+├── README.md
+└── docs/
+    └── images/
+        └── entra-mail-send-rbac-gui.png
+```
 
 ## Microsoft-Dokumentation
 
 - [Role Based Access Control for Applications in Exchange Online](https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac)
 - [Connect-ExchangeOnline](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/connect-exchangeonline)
-- [Exchange Online PowerShell](https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell)
+- [Test-ServicePrincipalAuthorization](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/test-serviceprincipalauthorization)
+- [About the Exchange Online PowerShell module](https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2)
 
-## Hinweis
+## Disclaimer
 
-Dieses Projekt ist ein Administrationswerkzeug und sollte nur von Personen verwendet werden, die berechtigt sind, Änderungen an Microsoft Entra ID und Exchange Online der jeweiligen Organisation vorzunehmen.
+Dieses Projekt ist kein offizielles Microsoft-Produkt. Verwendung auf eigene Verantwortung. Änderungen an produktiven Exchange-/Entra-Berechtigungen sollten vorab getestet und nach dem Least-Privilege-Prinzip geprüft werden.
