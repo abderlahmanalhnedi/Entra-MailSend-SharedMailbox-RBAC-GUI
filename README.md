@@ -1,5 +1,7 @@
 # Entra Mail.Send – Shared Mailbox RBAC Tool
 
+**Sprache / Language:** 🇩🇪 Deutsch · [🇬🇧 English](README_EN.md)
+
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.4%2B-5391FE?logo=powershell&logoColor=white)
 ![Avalonia](https://img.shields.io/badge/Avalonia-Cross--Platform%20GUI-7B2BF9)
 ![Windows GUI](https://img.shields.io/badge/Windows-GUI-0078D6?logo=windows&logoColor=white)
@@ -11,7 +13,7 @@ Ein Admin-Tool, um einer **Microsoft Entra Enterprise Application** die Exchange
 
 Das Repository enthält drei Varianten:
 
-- **Cross-Platform GUI (Avalonia)** – Windows, macOS und Linux
+- **Cross-Platform GUI (Avalonia)** – Windows, macOS und Linux, mit **Deutsch/English-Sprachumschaltung direkt in der Oberfläche**
 - **Windows PowerShell GUI** – klassische Windows Forms Oberfläche
 - **Cross-Platform CLI** – PowerShell-Menü für Windows, macOS und Linux
 
@@ -29,6 +31,12 @@ Alle Varianten verwenden **Exchange Online RBAC for Applications**. Das Admin-Ke
 ### Windows – PowerShell GUI
 
 ![Entra Mail.Send Shared Mailbox RBAC GUI unter Windows](docs/images/entra-mail-send-rbac-gui.png)
+
+## Sprache im Tool
+
+Die **Cross-Platform GUI** kann direkt oben rechts zwischen **Deutsch** und **English** umgeschaltet werden. Die Auswahl ändert sowohl die Oberfläche als auch die Status- und Fehlermeldungen des Exchange-Backends. Damit kann dieselbe Version beispielsweise von deutsch- und englischsprachigen Administratoren verwendet werden.
+
+> Für Michael bzw. englischsprachige Nutzer: oben rechts **English** auswählen. Eine vollständige englische Anleitung gibt es zusätzlich in [README_EN.md](README_EN.md).
 
 ## Varianten
 
@@ -176,14 +184,15 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 ## Bedienung der GUI
 
-1. **Admin-Konto** eintragen.
-2. **Microsoft Login** auswählen. Falls Browser-SSO nicht funktioniert, **Device Code** verwenden.
-3. **Application (Client) ID** eintragen.
-4. **Enterprise App Object ID** eintragen.
-5. **Shared Mailbox** eintragen.
-6. Sicherheitsbestätigung aktivieren.
-7. **Zugriff einrichten** auswählen.
-8. Das Tool führt anschließend automatisch einen Zugriffstest aus.
+1. Optional oben rechts **Deutsch** oder **English** auswählen.
+2. **Admin-Konto** eintragen.
+3. **Microsoft Login** auswählen. Falls Browser-SSO nicht funktioniert, **Device Code** verwenden.
+4. **Application (Client) ID** eintragen.
+5. **Enterprise App Object ID** eintragen.
+6. **Shared Mailbox** eintragen.
+7. Sicherheitsbestätigung aktivieren.
+8. **Zugriff einrichten** auswählen.
+9. Das Tool führt anschließend automatisch einen Zugriffstest aus.
 
 ## Benötigte IDs
 
