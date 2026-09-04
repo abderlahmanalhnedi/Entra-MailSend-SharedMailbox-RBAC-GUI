@@ -1,11 +1,17 @@
 # Cross-Platform GUI (Avalonia)
 
+**Sprache / Language:** 🇩🇪 Deutsch · [🇬🇧 English](README_EN.md)
+
 Diese Variante stellt dieselbe Exchange-Online-RBAC-Funktionalität wie die PowerShell-GUI/CLI über eine echte Desktop-Oberfläche auf **Windows, macOS und Linux** bereit.
+
+## Sprache
+
+Die Oberfläche kann oben rechts direkt zwischen **Deutsch** und **English** umgeschaltet werden. Die Auswahl gilt auch für Status- und Fehlermeldungen des Exchange-Backends.
 
 ## Architektur
 
 ```text
-Avalonia GUI (.NET 8)
+Avalonia GUI (.NET 10)
         ↓
 persistenter PowerShell-7-Worker
         ↓
@@ -20,7 +26,7 @@ Das Admin-Kennwort wird **nicht** von der Anwendung abgefragt oder gespeichert. 
 
 ## Voraussetzungen
 
-- .NET 8 SDK oder neuer
+- .NET 10 SDK
 - PowerShell 7.4 oder neuer (`pwsh` muss im `PATH` liegen)
 - Internetzugriff auf Microsoft 365 und PowerShell Gallery
 - Exchange Administrator
