@@ -1,0 +1,95 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="EntraMailSendRbac.Gui.MainWindow"
+        Title="Entra App – Mail.Send auf eine Shared Mailbox beschränken"
+        Width="900"
+        Height="780"
+        MinWidth="820"
+        MinHeight="700"
+        WindowStartupLocation="CenterScreen">
+
+  <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
+    <Grid Margin="28" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" RowSpacing="14">
+
+      <StackPanel Grid.Row="0" Spacing="4">
+        <TextBlock Text="Entra App – Mail.Send auf eine Shared Mailbox beschränken"
+                   FontSize="24"
+                   FontWeight="SemiBold" />
+        <TextBlock Text="Cross-Platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux"
+                   Opacity="0.70" />
+      </StackPanel>
+
+      <Border Grid.Row="1"
+              Padding="14"
+              CornerRadius="8"
+              BorderThickness="1"
+              BorderBrush="#D7A000"
+              Background="#FFF8E1">
+        <StackPanel Spacing="5">
+          <TextBlock Text="SICHERHEIT" FontWeight="Bold" Foreground="#7A5200" />
+          <TextBlock TextWrapping="Wrap"
+                     Foreground="#7A5200"
+                     Text="Für eine wirksame Exchange-RBAC-Begrenzung darf dieselbe App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen. Das Tool fragt niemals nach dem Admin-Kennwort; Anmeldung und MFA erfolgen ausschließlich über Microsoft." />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="2" Padding="12" CornerRadius="8" BorderThickness="1" BorderBrush="#D0D0D0">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+          <TextBlock Grid.Column="0" Text="Laufzeit:" VerticalAlignment="Center" FontWeight="SemiBold" />
+          <TextBlock Grid.Column="1" x:Name="RuntimeStatusText" Text="PowerShell-Backend wird geprüft …" VerticalAlignment="Center" />
+          <Button Grid.Column="2" x:Name="RetryRuntimeButton" Content="Erneut prüfen" IsVisible="False" />
+        </Grid>
+      </Border>
+
+      <Grid Grid.Row="3" ColumnDefinitions="190,*,Auto,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="6">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="1. Admin-Konto:" VerticalAlignment="Center" />
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="AdminTextBox" PlaceholderText="admin@firma.de" />
+        <Button Grid.Row="0" Grid.Column="2" x:Name="ConnectButton" Content="Microsoft Login" MinWidth="145" />
+        <Button Grid.Row="0" Grid.Column="3" x:Name="DeviceConnectButton" Content="Device Code" MinWidth="110" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" x:Name="ConnectionStatusText" Text="Nicht verbunden" Foreground="#A40000" />
+      </Grid>
+
+      <Grid Grid.Row="4" ColumnDefinitions="190,*" ColumnSpacing="10">
+        <TextBlock Grid.Column="0" Text="2. Application (Client) ID:" VerticalAlignment="Center" />
+        <TextBox Grid.Column="1" x:Name="AppIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+      </Grid>
+
+      <Grid Grid.Row="5" ColumnDefinitions="190,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="4">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="3. Enterprise App Object ID:" VerticalAlignment="Center" />
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="ObjectIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Opacity="0.65" TextWrapping="Wrap"
+                   Text="Wichtig: Object ID aus Entra ID → Enterprise applications verwenden, nicht die Object ID aus App registrations." />
+      </Grid>
+
+      <Grid Grid.Row="6" ColumnDefinitions="190,*" ColumnSpacing="10">
+        <TextBlock Grid.Column="0" Text="4. Shared Mailbox:" VerticalAlignment="Center" />
+        <TextBox Grid.Column="1" x:Name="MailboxTextBox" PlaceholderText="sharedmailbox@firma.de" />
+      </Grid>
+
+      <CheckBox Grid.Row="7"
+                x:Name="TenantMailSendCheckBox"
+                Margin="200,2,0,0"
+                Content="Ich bestätige: Tenantweites Microsoft Graph → Mail.Send (Application) ist für diese App entfernt bzw. nicht erteilt." />
+
+      <Grid Grid.Row="8" Margin="200,4,0,0" ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
+        <Button Grid.Column="0" x:Name="ConfigureButton" Content="Zugriff einrichten" MinWidth="165" />
+        <Button Grid.Column="1" x:Name="TestButton" Content="Zugriff testen" MinWidth="140" />
+        <Button Grid.Column="2" x:Name="DisconnectButton" Content="Verbindung trennen" MinWidth="150" />
+        <ProgressBar Grid.Column="3" x:Name="BusyProgress" IsIndeterminate="True" IsVisible="False" Height="6" VerticalAlignment="Center" />
+      </Grid>
+
+      <Grid Grid.Row="9" RowDefinitions="Auto,*" RowSpacing="6" MinHeight="230">
+        <TextBlock Grid.Row="0" Text="Status / Protokoll" FontWeight="SemiBold" />
+        <TextBox Grid.Row="1"
+                 x:Name="StatusTextBox"
+                 IsReadOnly="True"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 FontFamily="Menlo, Consolas, monospace" />
+      </Grid>
+
+    </Grid>
+  </ScrollViewer>
+</Window>
+
