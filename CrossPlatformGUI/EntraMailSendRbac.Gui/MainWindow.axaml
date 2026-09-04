@@ -1,23 +1,35 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="EntraMailSendRbac.Gui.MainWindow"
-        Title="Entra App – Mail.Send auf eine Shared Mailbox beschränken"
+        Title="Entra App – Mail.Send Shared Mailbox RBAC"
         Width="900"
-        Height="780"
+        Height="800"
         MinWidth="820"
-        MinHeight="700"
+        MinHeight="720"
         WindowStartupLocation="CenterScreen">
 
   <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
     <Grid Margin="28" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" RowSpacing="14">
 
-      <StackPanel Grid.Row="0" Spacing="4">
-        <TextBlock Text="Entra App – Mail.Send auf eine Shared Mailbox beschränken"
-                   FontSize="24"
-                   FontWeight="SemiBold" />
-        <TextBlock Text="Cross-Platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux"
-                   Opacity="0.70" />
-      </StackPanel>
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+        <StackPanel Grid.Column="0" Spacing="4">
+          <TextBlock x:Name="TitleText"
+                     Text="Entra App – Mail.Send auf eine Shared Mailbox beschränken"
+                     FontSize="24"
+                     FontWeight="SemiBold" />
+          <TextBlock x:Name="SubtitleText"
+                     Text="Cross-Platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux"
+                     Opacity="0.70" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Right">
+          <TextBlock x:Name="LanguageLabel" Text="Sprache" Opacity="0.70" />
+          <ComboBox x:Name="LanguageComboBox" SelectedIndex="0" Width="130">
+            <ComboBoxItem Content="Deutsch" />
+            <ComboBoxItem Content="English" />
+          </ComboBox>
+        </StackPanel>
+      </Grid>
 
       <Border Grid.Row="1"
               Padding="14"
@@ -26,8 +38,9 @@
               BorderBrush="#D7A000"
               Background="#FFF8E1">
         <StackPanel Spacing="5">
-          <TextBlock Text="SICHERHEIT" FontWeight="Bold" Foreground="#7A5200" />
-          <TextBlock TextWrapping="Wrap"
+          <TextBlock x:Name="SecurityHeadingText" Text="SICHERHEIT" FontWeight="Bold" Foreground="#7A5200" />
+          <TextBlock x:Name="SecurityBodyText"
+                     TextWrapping="Wrap"
                      Foreground="#7A5200"
                      Text="Für eine wirksame Exchange-RBAC-Begrenzung darf dieselbe App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen. Das Tool fragt niemals nach dem Admin-Kennwort; Anmeldung und MFA erfolgen ausschließlich über Microsoft." />
         </StackPanel>
@@ -35,14 +48,14 @@
 
       <Border Grid.Row="2" Padding="12" CornerRadius="8" BorderThickness="1" BorderBrush="#D0D0D0">
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-          <TextBlock Grid.Column="0" Text="Laufzeit:" VerticalAlignment="Center" FontWeight="SemiBold" />
+          <TextBlock Grid.Column="0" x:Name="RuntimeLabel" Text="Laufzeit:" VerticalAlignment="Center" FontWeight="SemiBold" />
           <TextBlock Grid.Column="1" x:Name="RuntimeStatusText" Text="PowerShell-Backend wird geprüft …" VerticalAlignment="Center" />
           <Button Grid.Column="2" x:Name="RetryRuntimeButton" Content="Erneut prüfen" IsVisible="False" />
         </Grid>
       </Border>
 
       <Grid Grid.Row="3" ColumnDefinitions="190,*,Auto,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="6">
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="1. Admin-Konto:" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="0" Grid.Column="0" x:Name="AdminLabel" Text="1. Admin-Konto:" VerticalAlignment="Center" />
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="AdminTextBox" PlaceholderText="admin@firma.de" />
         <Button Grid.Row="0" Grid.Column="2" x:Name="ConnectButton" Content="Microsoft Login" MinWidth="145" />
         <Button Grid.Row="0" Grid.Column="3" x:Name="DeviceConnectButton" Content="Device Code" MinWidth="110" />
@@ -50,19 +63,19 @@
       </Grid>
 
       <Grid Grid.Row="4" ColumnDefinitions="190,*" ColumnSpacing="10">
-        <TextBlock Grid.Column="0" Text="2. Application (Client) ID:" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="0" x:Name="AppIdLabel" Text="2. Application (Client) ID:" VerticalAlignment="Center" />
         <TextBox Grid.Column="1" x:Name="AppIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
       </Grid>
 
       <Grid Grid.Row="5" ColumnDefinitions="190,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="4">
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="3. Enterprise App Object ID:" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="0" Grid.Column="0" x:Name="ObjectIdLabel" Text="3. Enterprise App Object ID:" VerticalAlignment="Center" />
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="ObjectIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-        <TextBlock Grid.Row="1" Grid.Column="1" Opacity="0.65" TextWrapping="Wrap"
+        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="ObjectIdHintText" Opacity="0.65" TextWrapping="Wrap"
                    Text="Wichtig: Object ID aus Entra ID → Enterprise applications verwenden, nicht die Object ID aus App registrations." />
       </Grid>
 
       <Grid Grid.Row="6" ColumnDefinitions="190,*" ColumnSpacing="10">
-        <TextBlock Grid.Column="0" Text="4. Shared Mailbox:" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="0" x:Name="MailboxLabel" Text="4. Shared Mailbox:" VerticalAlignment="Center" />
         <TextBox Grid.Column="1" x:Name="MailboxTextBox" PlaceholderText="sharedmailbox@firma.de" />
       </Grid>
 
@@ -79,7 +92,7 @@
       </Grid>
 
       <Grid Grid.Row="9" RowDefinitions="Auto,*" RowSpacing="6" MinHeight="230">
-        <TextBlock Grid.Row="0" Text="Status / Protokoll" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="0" x:Name="StatusLabel" Text="Status / Protokoll" FontWeight="SemiBold" />
         <TextBox Grid.Row="1"
                  x:Name="StatusTextBox"
                  IsReadOnly="True"
@@ -92,4 +105,3 @@
     </Grid>
   </ScrollViewer>
 </Window>
-
