@@ -20,9 +20,15 @@ Alle Varianten verwenden **Exchange Online RBAC for Applications**. Das Admin-Ke
 > [!IMPORTANT]
 > Für eine wirksame Einschränkung darf dieselbe App **nicht zusätzlich tenantweit** über Microsoft Entra mit **Microsoft Graph → `Mail.Send (Application)`** berechtigt sein. Entra-Berechtigungen und Exchange Application RBAC wirken additiv.
 
-## Screenshot – Windows GUI
+## Screenshots
 
-![Entra Mail.Send Shared Mailbox RBAC GUI](docs/images/entra-mail-send-rbac-gui.png)
+### macOS – Cross-Platform GUI
+
+![Entra Mail.Send Shared Mailbox RBAC GUI auf macOS](docs/images/entra-mail-send-rbac-gui-macos.png)
+
+### Windows – PowerShell GUI
+
+![Entra Mail.Send Shared Mailbox RBAC GUI unter Windows](docs/images/entra-mail-send-rbac-gui.png)
 
 ## Varianten
 
@@ -68,7 +74,7 @@ Microsoft Entra Enterprise Application
 Die neue Cross-Platform GUI verwendet zusätzlich folgende lokale Architektur:
 
 ```text
-Avalonia GUI (.NET 8)
+Avalonia GUI (.NET 10)
         │
         ▼
 persistenter PowerShell-7-Worker
@@ -95,7 +101,7 @@ Der PowerShell-Worker bleibt während der Sitzung aktiv, damit die Exchange-Onli
 ### Cross-Platform GUI
 
 - Windows, macOS oder Linux
-- **.NET 8 SDK oder neuer**
+- **.NET 10 SDK**
 - **PowerShell 7.4 oder neuer** (`pwsh` im `PATH`)
 
 Microsoft unterstützt das Exchange-Online-PowerShell-Modul offiziell unter Windows, macOS und Linux mit PowerShell 7. Für neuere Modulversionen gelten passende PowerShell-Versionen; das Backend berücksichtigt diese Zuordnung.
@@ -262,7 +268,8 @@ Entra-MailSend-SharedMailbox-RBAC-GUI/
 ├── README.md
 ├── docs/
 │   └── images/
-│       └── entra-mail-send-rbac-gui.png
+│       ├── entra-mail-send-rbac-gui.png
+│       └── entra-mail-send-rbac-gui-macos.png
 │
 └── CrossPlatformGUI/
     ├── README.md
@@ -304,7 +311,7 @@ Prüfen:
 dotnet --version
 ```
 
-Für die GUI wird .NET 8 SDK oder neuer benötigt.
+Für die GUI wird das .NET 10 SDK benötigt.
 
 ### Microsoft Login öffnet sich nicht
 
