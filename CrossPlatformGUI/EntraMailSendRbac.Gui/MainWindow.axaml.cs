@@ -11,6 +11,8 @@ public partial class MainWindow : Window
     private readonly PowerShellWorkerService _worker = new();
     private bool _runtimeReady;
     private bool _connected;
+    private string _language = "de";
+    private string _runtimeSummary = string.Empty;
 
     public MainWindow()
     {
@@ -22,6 +24,13 @@ public partial class MainWindow : Window
         Opened += async (_, _) => await InitializeRuntimeAsync();
         Closing += (_, _) => _ = _worker.DisposeAsync();
 
+        LanguageComboBox.SelectionChanged += (_, _) =>
+        {
+            _language = LanguageComboBox.SelectedIndex == 1 ? "en" : "de";
+            _worker.Language = _language;
+            ApplyLanguage();
+        };
+
         RetryRuntimeButton.Click += async (_, _) => await InitializeRuntimeAsync();
         ConnectButton.Click += async (_, _) => await ConnectAsync("browser");
         DeviceConnectButton.Click += async (_, _) => await ConnectAsync("device");
@@ -29,39 +38,96 @@ public partial class MainWindow : Window
         TestButton.Click += async (_, _) => await TestAsync();
         DisconnectButton.Click += async (_, _) => await DisconnectAsync();
 
+        _worker.Language = _language;
+        ApplyLanguage();
         SetActionButtons();
+    }
+
+    private string T(string de, string en) => _language == "en" ? en : de;
+
+    private void ApplyLanguage()
+    {
+        Title = T(
+            "Entra App – Mail.Send auf eine Shared Mailbox beschränken",
+            "Entra App – Restrict Mail.Send to one Shared Mailbox");
+
+        TitleText.Text = Title;
+        SubtitleText.Text = T(
+            "Cross-Platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux",
+            "Cross-platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux");
+
+        LanguageLabel.Text = T("Sprache", "Language");
+        SecurityHeadingText.Text = T("SICHERHEIT", "SECURITY");
+        SecurityBodyText.Text = T(
+            "Für eine wirksame Exchange-RBAC-Begrenzung darf dieselbe App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen. Das Tool fragt niemals nach dem Admin-Kennwort; Anmeldung und MFA erfolgen ausschließlich über Microsoft.",
+            "For the Exchange RBAC restriction to be effective, the same app must not also have tenant-wide Microsoft Graph → Mail.Send (Application). The tool never asks for the admin password; sign-in and MFA are handled exclusively by Microsoft.");
+
+        RuntimeLabel.Text = T("Laufzeit:", "Runtime:");
+        RetryRuntimeButton.Content = T("Erneut prüfen", "Check again");
+
+        AdminLabel.Text = T("1. Admin-Konto:", "1. Admin account:");
+        AppIdLabel.Text = "2. Application (Client) ID:";
+        ObjectIdLabel.Text = "3. Enterprise App Object ID:";
+        ObjectIdHintText.Text = T(
+            "Wichtig: Object ID aus Entra ID → Enterprise applications verwenden, nicht die Object ID aus App registrations.",
+            "Important: Use the Object ID from Entra ID → Enterprise applications, not the Object ID from App registrations.");
+        MailboxLabel.Text = "4. Shared Mailbox:";
+
+        TenantMailSendCheckBox.Content = T(
+            "Ich bestätige: Tenantweites Microsoft Graph → Mail.Send (Application) ist für diese App entfernt bzw. nicht erteilt.",
+            "I confirm: Tenant-wide Microsoft Graph → Mail.Send (Application) has been removed or is not granted for this app.");
+
+        ConfigureButton.Content = T("Zugriff einrichten", "Configure access");
+        TestButton.Content = T("Zugriff testen", "Test access");
+        DisconnectButton.Content = T("Verbindung trennen", "Disconnect");
+        StatusLabel.Text = T("Status / Protokoll", "Status / Log");
+
+        if (_runtimeReady && !string.IsNullOrWhiteSpace(_runtimeSummary))
+            RuntimeStatusText.Text = _runtimeSummary;
+        else if (!_runtimeReady)
+            RuntimeStatusText.Text = T("PowerShell-Backend wird geprüft …", "Checking PowerShell backend …");
+
+        var admin = AdminTextBox.Text?.Trim() ?? string.Empty;
+        ConnectionStatusText.Text = _connected
+            ? T($"Verbunden: {admin}", $"Connected: {admin}")
+            : T("Nicht verbunden", "Not connected");
     }
 
     private async Task InitializeRuntimeAsync()
     {
         SetBusy(true);
-        RuntimeStatusText.Text = "PowerShell und ExchangeOnlineManagement werden geprüft …";
+        RuntimeStatusText.Text = T(
+            "PowerShell und ExchangeOnlineManagement werden geprüft …",
+            "Checking PowerShell and ExchangeOnlineManagement …");
         RetryRuntimeButton.IsVisible = false;
-        AddStatus("Starte Cross-Platform PowerShell-Backend …");
+        AddStatus(T(
+            "Starte Cross-Platform PowerShell-Backend …",
+            "Starting cross-platform PowerShell backend …"));
 
         try
         {
             await _worker.StartAsync();
             var response = await _worker.SendAsync(
                 "init",
-                new { installIfMissing = true },
+                new { installIfMissing = true, language = _language },
                 TimeSpan.FromMinutes(5));
 
             if (!response.Success)
                 throw new InvalidOperationException(response.Message);
 
-            var platform = ReadString(response.Data, "platform") ?? "unbekannt";
-            var psVersion = ReadString(response.Data, "powerShellVersion") ?? "unbekannt";
-            var moduleVersion = ReadString(response.Data, "moduleVersion") ?? "unbekannt";
+            var platform = ReadString(response.Data, "platform") ?? T("unbekannt", "unknown");
+            var psVersion = ReadString(response.Data, "powerShellVersion") ?? T("unbekannt", "unknown");
+            var moduleVersion = ReadString(response.Data, "moduleVersion") ?? T("unbekannt", "unknown");
 
-            RuntimeStatusText.Text = $"{platform} · PowerShell {psVersion} · ExchangeOnlineManagement {moduleVersion}";
+            _runtimeSummary = $"{platform} · PowerShell {psVersion} · ExchangeOnlineManagement {moduleVersion}";
+            RuntimeStatusText.Text = _runtimeSummary;
             _runtimeReady = true;
-            AddStatus("[OK] Laufzeit ist bereit.");
+            AddStatus(T("[OK] Laufzeit ist bereit.", "[OK] Runtime is ready."));
         }
         catch (Exception ex)
         {
             _runtimeReady = false;
-            RuntimeStatusText.Text = "Laufzeitprüfung fehlgeschlagen";
+            RuntimeStatusText.Text = T("Laufzeitprüfung fehlgeschlagen", "Runtime check failed");
             RetryRuntimeButton.IsVisible = true;
             AddStatus($"[ERROR] {ex.Message}");
         }
@@ -77,39 +143,45 @@ public partial class MainWindow : Window
         var admin = AdminTextBox.Text?.Trim() ?? string.Empty;
         if (!LooksLikeMailAddress(admin))
         {
-            AddStatus("[ERROR] Bitte ein gültiges Admin-Konto eingeben.");
+            AddStatus(T(
+                "[ERROR] Bitte ein gültiges Admin-Konto eingeben.",
+                "[ERROR] Please enter a valid admin account."));
             return;
         }
 
         SetBusy(true);
         AddStatus(mode == "device"
-            ? "Starte Microsoft Device-Code-Anmeldung …"
-            : $"Öffne Microsoft-Anmeldung für {admin} …");
+            ? T("Starte Microsoft Device-Code-Anmeldung …", "Starting Microsoft device-code sign-in …")
+            : T($"Öffne Microsoft-Anmeldung für {admin} …", $"Opening Microsoft sign-in for {admin} …"));
 
         try
         {
             var response = await _worker.SendAsync(
                 "connect",
-                new { adminUpn = admin, mode },
+                new { adminUpn = admin, mode, language = _language },
                 TimeSpan.FromMinutes(10));
 
             if (!response.Success)
                 throw new InvalidOperationException(response.Message);
 
             _connected = true;
-            ConnectionStatusText.Text = $"Verbunden: {admin}";
+            ConnectionStatusText.Text = T($"Verbunden: {admin}", $"Connected: {admin}");
             ConnectionStatusText.Foreground = Brushes.Green;
-            AddStatus("[OK] Verbindung zu Exchange Online erfolgreich.");
+            AddStatus(T(
+                "[OK] Verbindung zu Exchange Online erfolgreich.",
+                "[OK] Connected to Exchange Online successfully."));
         }
         catch (Exception ex)
         {
             _connected = false;
-            ConnectionStatusText.Text = "Nicht verbunden";
+            ConnectionStatusText.Text = T("Nicht verbunden", "Not connected");
             ConnectionStatusText.Foreground = Brushes.DarkRed;
             AddStatus($"[ERROR] {ex.Message}");
 
             if (mode == "browser")
-                AddStatus("Hinweis: Falls der Browser-Login auf diesem System nicht funktioniert, 'Device Code' verwenden.");
+                AddStatus(T(
+                    "Hinweis: Falls der Browser-Login auf diesem System nicht funktioniert, 'Device Code' verwenden.",
+                    "Note: If browser sign-in does not work on this system, use 'Device Code'."));
         }
         finally
         {
@@ -128,12 +200,16 @@ public partial class MainWindow : Window
 
         if (TenantMailSendCheckBox.IsChecked != true)
         {
-            AddStatus("[ERROR] Die Sicherheitsbestätigung muss vor der Konfiguration aktiviert werden.");
+            AddStatus(T(
+                "[ERROR] Die Sicherheitsbestätigung muss vor der Konfiguration aktiviert werden.",
+                "[ERROR] The security confirmation must be selected before configuration."));
             return;
         }
 
         SetBusy(true);
-        AddStatus("Richte Exchange Application RBAC ein …");
+        AddStatus(T(
+            "Richte Exchange Application RBAC ein …",
+            "Configuring Exchange Application RBAC …"));
 
         try
         {
@@ -144,21 +220,26 @@ public partial class MainWindow : Window
                     appId = config.AppId,
                     objectId = config.ObjectId,
                     mailbox = config.Mailbox,
-                    tenantWideMailSendRemoved = true
+                    tenantWideMailSendRemoved = true,
+                    language = _language
                 },
                 TimeSpan.FromMinutes(5));
 
             if (!response.Success)
                 throw new InvalidOperationException(response.Message);
 
-            AddStatus("[OK] Exchange-RBAC-Konfiguration wurde eingerichtet.");
+            AddStatus(T(
+                "[OK] Exchange-RBAC-Konfiguration wurde eingerichtet.",
+                "[OK] Exchange RBAC configuration completed."));
 
             var scope = ReadString(response.Data, "scopeName");
             var assignment = ReadString(response.Data, "assignmentName");
             if (!string.IsNullOrWhiteSpace(scope)) AddStatus($"Scope: {scope}");
             if (!string.IsNullOrWhiteSpace(assignment)) AddStatus($"Role Assignment: {assignment}");
 
-            AddStatus("Starte automatische Sicherheitsprüfung …");
+            AddStatus(T(
+                "Starte automatische Sicherheitsprüfung …",
+                "Starting automatic security check …"));
             await TestAsync(skipBusyChange: true);
         }
         catch (Exception ex)
@@ -181,7 +262,9 @@ public partial class MainWindow : Window
         }
 
         if (!skipBusyChange) SetBusy(true);
-        AddStatus($"Teste Application Mail.Send für {config.Mailbox} …");
+        AddStatus(T(
+            $"Teste Application Mail.Send für {config.Mailbox} …",
+            $"Testing Application Mail.Send for {config.Mailbox} …"));
 
         try
         {
@@ -191,15 +274,20 @@ public partial class MainWindow : Window
                 {
                     appId = config.AppId,
                     objectId = config.ObjectId,
-                    mailbox = config.Mailbox
+                    mailbox = config.Mailbox,
+                    language = _language
                 },
                 TimeSpan.FromMinutes(3));
 
             if (!response.Success)
                 throw new InvalidOperationException(response.Message);
 
-            AddStatus($"[OK] GRANTED: Application Mail.Send ist für {config.Mailbox} im erwarteten Scope.");
-            AddStatus("Hinweis: Dieser Test prüft Exchange Application RBAC. Tenantweite Entra API Permissions müssen separat ausgeschlossen sein.");
+            AddStatus(T(
+                $"[OK] GRANTED: Application Mail.Send ist für {config.Mailbox} im erwarteten Scope.",
+                $"[OK] GRANTED: Application Mail.Send is in the expected scope for {config.Mailbox}."));
+            AddStatus(T(
+                "Hinweis: Dieser Test prüft Exchange Application RBAC. Tenantweite Entra API Permissions müssen separat ausgeschlossen sein.",
+                "Note: This test checks Exchange Application RBAC. Tenant-wide Entra API permissions must be ruled out separately."));
         }
         catch (Exception ex)
         {
@@ -220,14 +308,20 @@ public partial class MainWindow : Window
         SetBusy(true);
         try
         {
-            var response = await _worker.SendAsync("disconnect", new { }, TimeSpan.FromMinutes(1));
+            var response = await _worker.SendAsync(
+                "disconnect",
+                new { language = _language },
+                TimeSpan.FromMinutes(1));
+
             if (!response.Success)
                 throw new InvalidOperationException(response.Message);
 
             _connected = false;
-            ConnectionStatusText.Text = "Nicht verbunden";
+            ConnectionStatusText.Text = T("Nicht verbunden", "Not connected");
             ConnectionStatusText.Foreground = Brushes.DarkRed;
-            AddStatus("[OK] Exchange-Online-Verbindung getrennt.");
+            AddStatus(T(
+                "[OK] Exchange-Online-Verbindung getrennt.",
+                "[OK] Disconnected from Exchange Online."));
         }
         catch (Exception ex)
         {
@@ -249,19 +343,25 @@ public partial class MainWindow : Window
 
         if (!Guid.TryParse(configuration.AppId, out _))
         {
-            error = "Application (Client) ID fehlt oder ist keine gültige GUID.";
+            error = T(
+                "Application (Client) ID fehlt oder ist keine gültige GUID.",
+                "Application (Client) ID is missing or is not a valid GUID.");
             return false;
         }
 
         if (!Guid.TryParse(configuration.ObjectId, out _))
         {
-            error = "Enterprise App Object ID fehlt oder ist keine gültige GUID.";
+            error = T(
+                "Enterprise App Object ID fehlt oder ist keine gültige GUID.",
+                "Enterprise App Object ID is missing or is not a valid GUID.");
             return false;
         }
 
         if (!LooksLikeMailAddress(configuration.Mailbox))
         {
-            error = "Shared Mailbox fehlt oder ist keine gültige E-Mail-Adresse.";
+            error = T(
+                "Shared Mailbox fehlt oder ist keine gültige E-Mail-Adresse.",
+                "Shared Mailbox is missing or is not a valid email address.");
             return false;
         }
 
@@ -284,6 +384,7 @@ public partial class MainWindow : Window
         ObjectIdTextBox.IsEnabled = !busy;
         MailboxTextBox.IsEnabled = !busy;
         TenantMailSendCheckBox.IsEnabled = !busy;
+        LanguageComboBox.IsEnabled = !busy;
         RetryRuntimeButton.IsEnabled = !busy;
         ConnectButton.IsEnabled = !busy && _runtimeReady;
         DeviceConnectButton.IsEnabled = !busy && _runtimeReady;
