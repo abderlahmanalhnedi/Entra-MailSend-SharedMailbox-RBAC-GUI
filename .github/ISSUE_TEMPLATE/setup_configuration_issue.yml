@@ -1,0 +1,77 @@
+name: "⚙️ Setup / Configuration Issue"
+description: Get help with Entra, Exchange Online, RBAC, or application configuration
+title: "[Configuration]: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for configuration and setup problems.
+
+        Never post client secrets, access tokens, passwords, private keys,
+        certificates containing private keys, or authentication cookies.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Configuration area
+      options:
+        - Entra App Registration
+        - Enterprise Application
+        - App Roles
+        - User / Group Role Assignment
+        - Exchange Online
+        - Application RBAC
+        - Shared Mailbox scope
+        - Authentication
+        - PowerShell dependencies
+        - .NET / Avalonia dependencies
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to configure?
+      placeholder: |
+        Example:
+        Allow one Entra application with Mail.Send to send mail
+        only as a specific shared mailbox.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current configuration
+      description: Describe the relevant configuration without including secrets.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is not working?
+    validations:
+      required: true
+
+  - type: textarea
+    id: errors
+    attributes:
+      label: Error messages
+      render: shell
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you already tried?
+
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security confirmation
+      options:
+        - label: I have not included passwords, secrets, tokens, or private keys.
+          required: true
