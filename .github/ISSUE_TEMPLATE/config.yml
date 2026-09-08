@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: "📖 Project Documentation"
+    url: "https://github.com/abderlahmanalhnedi/Entra-MailSend-SharedMailbox-RBAC-GUI"
+    about: "Check the project documentation before opening an issue."

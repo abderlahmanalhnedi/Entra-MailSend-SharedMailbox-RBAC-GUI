@@ -1,0 +1,125 @@
+name: "🐛 Bug Report"
+description: Report a reproducible problem with the application
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem.
+
+        Please do not include passwords, access tokens, client secrets, private keys,
+        certificates containing private keys, or other sensitive information.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected component
+      options:
+        - Cross-platform GUI
+        - PowerShell CLI
+        - Windows GUI
+        - Microsoft Entra configuration
+        - Exchange Online / RBAC
+        - Authentication
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS Apple Silicon
+        - macOS Intel
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os_version
+    attributes:
+      label: OS version
+      placeholder: "Example: macOS 26 / Windows 11 24H2"
+
+  - type: input
+    id: app_version
+    attributes:
+      label: Application / repository version
+      description: Commit, tag, or release version if known
+      placeholder: "Example: v1.0.0 or commit abc123"
+
+  - type: input
+    id: powershell
+    attributes:
+      label: PowerShell version
+      placeholder: "Example: 7.6.5"
+
+  - type: input
+    id: dotnet
+    attributes:
+      label: .NET version
+      placeholder: "Example: 8.0.x or 10.0.x"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description
+      description: Describe what is going wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the application
+        2. Select ...
+        3. Enter ...
+        4. Click ...
+        5. Error appears
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error output
+      description: Paste relevant error messages here. Remove tenant IDs, email addresses, tokens, secrets, and other sensitive data where appropriate.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop screenshots here if useful.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues before creating this issue.
+          required: true
+        - label: I removed credentials, secrets, and other sensitive information.
+          required: true
