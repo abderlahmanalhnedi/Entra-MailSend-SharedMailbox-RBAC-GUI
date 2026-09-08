@@ -1,0 +1,94 @@
+name: "🖥️ Cross-Platform / macOS Issue"
+description: Report macOS, .NET, Avalonia, or cross-platform compatibility problems
+title: "[Cross-Platform]: "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - macOS Apple Silicon
+        - macOS Intel
+        - Windows x64
+        - Windows ARM64
+        - Linux x64
+        - Linux ARM64
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS version
+      placeholder: "Example: macOS 26"
+
+  - type: input
+    id: architecture
+    attributes:
+      label: Architecture
+      placeholder: "Example: arm64 or x64"
+    validations:
+      required: true
+
+  - type: input
+    id: dotnet
+    attributes:
+      label: .NET SDK version
+      placeholder: "Output of: dotnet --version"
+    validations:
+      required: true
+
+  - type: textarea
+    id: runtimes
+    attributes:
+      label: Installed .NET runtimes
+      description: Paste the output of dotnet --list-runtimes.
+      render: shell
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Clone repository
+        2. Run ...
+        3. Build ...
+        4. Start application
+        5. Error occurs
+    validations:
+      required: true
+
+  - type: textarea
+    id: build_output
+    attributes:
+      label: Build / runtime output
+      render: shell
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I tested with a supported .NET SDK/runtime.
+          required: true
+        - label: I removed credentials and sensitive information from the logs.
+          required: true
