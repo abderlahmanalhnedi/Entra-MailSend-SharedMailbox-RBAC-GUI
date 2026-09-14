@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -29,11 +28,11 @@ public partial class MainWindow : Window
             _language = LanguageComboBox.SelectedIndex == 1 ? "en" : "de";
             _worker.Language = _language;
             ApplyLanguage();
+            AddStatus(T("Sprache auf Deutsch geändert.", "Language changed to English."));
         };
 
         RetryRuntimeButton.Click += async (_, _) => await InitializeRuntimeAsync();
-        ConnectButton.Click += async (_, _) => await ConnectAsync("browser");
-        DeviceConnectButton.Click += async (_, _) => await ConnectAsync("device");
+        ConnectButton.Click += async (_, _) => await ConnectAsync();
         ConfigureButton.Click += async (_, _) => await ConfigureAsync();
         TestButton.Click += async (_, _) => await TestAsync();
         DisconnectButton.Click += async (_, _) => await DisconnectAsync();
@@ -48,39 +47,52 @@ public partial class MainWindow : Window
     private void ApplyLanguage()
     {
         Title = T(
-            "Entra App – Mail.Send auf eine Shared Mailbox beschränken",
-            "Entra App – Restrict Mail.Send to one Shared Mailbox");
+            "Mail.Send – Shared Mailbox RBAC",
+            "Mail.Send – Shared Mailbox RBAC");
 
         TitleText.Text = Title;
         SubtitleText.Text = T(
-            "Cross-Platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux",
-            "Cross-platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux");
+            "Microsoft Entra + Exchange Online · sicher auf eine Shared Mailbox begrenzen",
+            "Microsoft Entra + Exchange Online · securely restrict access to one Shared Mailbox");
 
         LanguageLabel.Text = T("Sprache", "Language");
-        SecurityHeadingText.Text = T("SICHERHEIT", "SECURITY");
-        SecurityBodyText.Text = T(
-            "Für eine wirksame Exchange-RBAC-Begrenzung darf dieselbe App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen. Das Tool fragt niemals nach dem Admin-Kennwort; Anmeldung und MFA erfolgen ausschließlich über Microsoft.",
-            "For the Exchange RBAC restriction to be effective, the same app must not also have tenant-wide Microsoft Graph → Mail.Send (Application). The tool never asks for the admin password; sign-in and MFA are handled exclusively by Microsoft.");
-
-        RuntimeLabel.Text = T("Laufzeit:", "Runtime:");
+        RuntimeLabel.Text = T("System:", "System:");
         RetryRuntimeButton.Content = T("Erneut prüfen", "Check again");
 
-        AdminLabel.Text = T("1. Admin-Konto:", "1. Admin account:");
-        AppIdLabel.Text = "2. Application (Client) ID:";
-        ObjectIdLabel.Text = "3. Enterprise App Object ID:";
+        Step1TitleText.Text = T("Mit Microsoft anmelden", "Sign in with Microsoft");
+        Step1BodyText.Text = T(
+            "Die Anmeldung läuft direkt über Microsoft. MFA, Passkeys und Conditional Access bleiben vollständig erhalten.",
+            "Sign-in is handled directly by Microsoft. MFA, passkeys and Conditional Access remain fully supported.");
+        AdminLabel.Text = T("Admin-Konto", "Admin account");
+        ConnectButton.Content = T("Mit Microsoft anmelden", "Sign in with Microsoft");
+
+        Step2TitleText.Text = T("App und Shared Mailbox", "App and Shared Mailbox");
+        Step2BodyText.Text = T(
+            "Trage die Entra-App und die Shared Mailbox ein, die Mail.Send erhalten soll.",
+            "Enter the Entra app and the Shared Mailbox that should receive Mail.Send access.");
+        AppIdLabel.Text = "Application (Client) ID";
+        ObjectIdLabel.Text = "Enterprise App Object ID";
         ObjectIdHintText.Text = T(
-            "Wichtig: Object ID aus Entra ID → Enterprise applications verwenden, nicht die Object ID aus App registrations.",
-            "Important: Use the Object ID from Entra ID → Enterprise applications, not the Object ID from App registrations.");
-        MailboxLabel.Text = "4. Shared Mailbox:";
+            "Object ID aus Entra ID → Enterprise applications verwenden, nicht aus App registrations.",
+            "Use the Object ID from Entra ID → Enterprise applications, not from App registrations.");
+        MailboxLabel.Text = "Shared Mailbox";
 
+        SecurityHeadingText.Text = T("Sicherheitsprüfung", "Security check");
+        SecurityBodyText.Text = T(
+            "Damit die Begrenzung wirklich gilt, darf diese App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen.",
+            "For the restriction to be effective, this app must not also have tenant-wide Microsoft Graph → Mail.Send (Application).");
         TenantMailSendCheckBox.Content = T(
-            "Ich bestätige: Tenantweites Microsoft Graph → Mail.Send (Application) ist für diese App entfernt bzw. nicht erteilt.",
-            "I confirm: Tenant-wide Microsoft Graph → Mail.Send (Application) has been removed or is not granted for this app.");
+            "Ich bestätige, dass tenantweites Mail.Send (Application) entfernt bzw. nicht erteilt ist.",
+            "I confirm that tenant-wide Mail.Send (Application) has been removed or is not granted.");
 
+        Step3TitleText.Text = T("Zugriff einrichten und prüfen", "Configure and verify access");
+        Step3BodyText.Text = T(
+            "Die App erstellt den Exchange-RBAC-Scope und führt danach automatisch einen Sicherheitstest aus.",
+            "The app creates the Exchange RBAC scope and then automatically performs a security test.");
         ConfigureButton.Content = T("Zugriff einrichten", "Configure access");
         TestButton.Content = T("Zugriff testen", "Test access");
-        DisconnectButton.Content = T("Verbindung trennen", "Disconnect");
-        StatusLabel.Text = T("Status / Protokoll", "Status / Log");
+        DisconnectButton.Content = T("Abmelden", "Sign out");
+        StatusLabel.Text = T("Details anzeigen", "Show details");
 
         if (_runtimeReady && !string.IsNullOrWhiteSpace(_runtimeSummary))
             RuntimeStatusText.Text = _runtimeSummary;
@@ -89,7 +101,7 @@ public partial class MainWindow : Window
 
         var admin = AdminTextBox.Text?.Trim() ?? string.Empty;
         ConnectionStatusText.Text = _connected
-            ? T($"Verbunden: {admin}", $"Connected: {admin}")
+            ? T($"Verbunden als {admin}", $"Connected as {admin}")
             : T("Nicht verbunden", "Not connected");
     }
 
@@ -101,8 +113,8 @@ public partial class MainWindow : Window
             "Checking PowerShell and ExchangeOnlineManagement …");
         RetryRuntimeButton.IsVisible = false;
         AddStatus(T(
-            "Starte Cross-Platform PowerShell-Backend …",
-            "Starting cross-platform PowerShell backend …"));
+            "Starte PowerShell-Backend …",
+            "Starting PowerShell backend …"));
 
         try
         {
@@ -122,12 +134,12 @@ public partial class MainWindow : Window
             _runtimeSummary = $"{platform} · PowerShell {psVersion} · ExchangeOnlineManagement {moduleVersion}";
             RuntimeStatusText.Text = _runtimeSummary;
             _runtimeReady = true;
-            AddStatus(T("[OK] Laufzeit ist bereit.", "[OK] Runtime is ready."));
+            AddStatus(T("[OK] System ist bereit.", "[OK] System is ready."));
         }
         catch (Exception ex)
         {
             _runtimeReady = false;
-            RuntimeStatusText.Text = T("Laufzeitprüfung fehlgeschlagen", "Runtime check failed");
+            RuntimeStatusText.Text = T("Systemprüfung fehlgeschlagen", "System check failed");
             RetryRuntimeButton.IsVisible = true;
             AddStatus($"[ERROR] {ex.Message}");
         }
@@ -138,7 +150,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task ConnectAsync(string mode)
+    private async Task ConnectAsync()
     {
         var admin = AdminTextBox.Text?.Trim() ?? string.Empty;
         if (!LooksLikeMailAddress(admin))
@@ -150,38 +162,36 @@ public partial class MainWindow : Window
         }
 
         SetBusy(true);
-        AddStatus(mode == "device"
-            ? T("Starte Microsoft Device-Code-Anmeldung …", "Starting Microsoft device-code sign-in …")
-            : T($"Öffne Microsoft-Anmeldung für {admin} …", $"Opening Microsoft sign-in for {admin} …"));
+        AddStatus(T(
+            $"Öffne Microsoft-Anmeldung für {admin} …",
+            $"Opening Microsoft sign-in for {admin} …"));
 
         try
         {
             var response = await _worker.SendAsync(
                 "connect",
-                new { adminUpn = admin, mode, language = _language },
+                new { adminUpn = admin, mode = "browser", language = _language },
                 TimeSpan.FromMinutes(10));
 
             if (!response.Success)
                 throw new InvalidOperationException(response.Message);
 
             _connected = true;
-            ConnectionStatusText.Text = T($"Verbunden: {admin}", $"Connected: {admin}");
-            ConnectionStatusText.Foreground = Brushes.Green;
+            ConnectionStatusText.Text = T($"Verbunden als {admin}", $"Connected as {admin}");
+            ConnectionStatusText.Foreground = new SolidColorBrush(Color.Parse("#138A5B"));
             AddStatus(T(
-                "[OK] Verbindung zu Exchange Online erfolgreich.",
-                "[OK] Connected to Exchange Online successfully."));
+                "[OK] Anmeldung bei Exchange Online erfolgreich.",
+                "[OK] Signed in to Exchange Online successfully."));
         }
         catch (Exception ex)
         {
             _connected = false;
             ConnectionStatusText.Text = T("Nicht verbunden", "Not connected");
-            ConnectionStatusText.Foreground = Brushes.DarkRed;
+            ConnectionStatusText.Foreground = new SolidColorBrush(Color.Parse("#C9372C"));
             AddStatus($"[ERROR] {ex.Message}");
-
-            if (mode == "browser")
-                AddStatus(T(
-                    "Hinweis: Falls der Browser-Login auf diesem System nicht funktioniert, 'Device Code' verwenden.",
-                    "Note: If browser sign-in does not work on this system, use 'Device Code'."));
+            AddStatus(T(
+                "Die Microsoft-Anmeldung konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
+                "Microsoft sign-in could not be completed. Please try again."));
         }
         finally
         {
@@ -201,8 +211,8 @@ public partial class MainWindow : Window
         if (TenantMailSendCheckBox.IsChecked != true)
         {
             AddStatus(T(
-                "[ERROR] Die Sicherheitsbestätigung muss vor der Konfiguration aktiviert werden.",
-                "[ERROR] The security confirmation must be selected before configuration."));
+                "[ERROR] Bitte zuerst die Sicherheitsbestätigung aktivieren.",
+                "[ERROR] Please confirm the security requirement first."));
             return;
         }
 
@@ -263,8 +273,8 @@ public partial class MainWindow : Window
 
         if (!skipBusyChange) SetBusy(true);
         AddStatus(T(
-            $"Teste Application Mail.Send für {config.Mailbox} …",
-            $"Testing Application Mail.Send for {config.Mailbox} …"));
+            $"Teste Mail.Send für {config.Mailbox} …",
+            $"Testing Mail.Send for {config.Mailbox} …"));
 
         try
         {
@@ -283,11 +293,11 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException(response.Message);
 
             AddStatus(T(
-                $"[OK] GRANTED: Application Mail.Send ist für {config.Mailbox} im erwarteten Scope.",
-                $"[OK] GRANTED: Application Mail.Send is in the expected scope for {config.Mailbox}."));
+                $"[OK] GRANTED: Mail.Send ist für {config.Mailbox} im erwarteten Scope.",
+                $"[OK] GRANTED: Mail.Send is in the expected scope for {config.Mailbox}."));
             AddStatus(T(
-                "Hinweis: Dieser Test prüft Exchange Application RBAC. Tenantweite Entra API Permissions müssen separat ausgeschlossen sein.",
-                "Note: This test checks Exchange Application RBAC. Tenant-wide Entra API permissions must be ruled out separately."));
+                "Hinweis: Tenantweite Entra API Permissions müssen separat ausgeschlossen sein.",
+                "Note: Tenant-wide Entra API permissions must be ruled out separately."));
         }
         catch (Exception ex)
         {
@@ -318,10 +328,10 @@ public partial class MainWindow : Window
 
             _connected = false;
             ConnectionStatusText.Text = T("Nicht verbunden", "Not connected");
-            ConnectionStatusText.Foreground = Brushes.DarkRed;
+            ConnectionStatusText.Foreground = new SolidColorBrush(Color.Parse("#C9372C"));
             AddStatus(T(
-                "[OK] Exchange-Online-Verbindung getrennt.",
-                "[OK] Disconnected from Exchange Online."));
+                "[OK] Von Exchange Online abgemeldet.",
+                "[OK] Signed out from Exchange Online."));
         }
         catch (Exception ex)
         {
@@ -387,7 +397,6 @@ public partial class MainWindow : Window
         LanguageComboBox.IsEnabled = !busy;
         RetryRuntimeButton.IsEnabled = !busy;
         ConnectButton.IsEnabled = !busy && _runtimeReady;
-        DeviceConnectButton.IsEnabled = !busy && _runtimeReady;
         ConfigureButton.IsEnabled = !busy && _runtimeReady && _connected;
         TestButton.IsEnabled = !busy && _runtimeReady && _connected;
         DisconnectButton.IsEnabled = !busy && _runtimeReady && _connected;
@@ -396,7 +405,6 @@ public partial class MainWindow : Window
     private void SetActionButtons()
     {
         ConnectButton.IsEnabled = _runtimeReady;
-        DeviceConnectButton.IsEnabled = _runtimeReady;
         ConfigureButton.IsEnabled = _runtimeReady && _connected;
         TestButton.IsEnabled = _runtimeReady && _connected;
         DisconnectButton.IsEnabled = _runtimeReady && _connected;
@@ -409,6 +417,9 @@ public partial class MainWindow : Window
             ? $"[{stamp}] {message}"
             : $"{StatusTextBox.Text}{Environment.NewLine}[{stamp}] {message}";
         StatusTextBox.CaretIndex = StatusTextBox.Text?.Length ?? 0;
+
+        if (message.Contains("[ERROR]", StringComparison.OrdinalIgnoreCase))
+            LogExpander.IsExpanded = true;
     }
 
     private static string? ReadString(JsonElement data, string propertyName)
