@@ -37,8 +37,25 @@ public sealed class PowerShellWorkerService : IAsyncDisposable
         };
         startInfo.ArgumentList.Add("-NoLogo");
         startInfo.ArgumentList.Add("-NoProfile");
-        startInfo.ArgumentList.Add("-File");
-        startInfo.ArgumentList.Add(workerPath);
+
+        if (OperatingSystem.IsWindows())
+        {
+            // ExchangeOnlineManagement 3.7+ enables WAM by default. Because this GUI hosts
+            // Exchange PowerShell inside a redirected child process, WAM has no native parent
+            // window handle and can fail with "A window handle must be configured".
+            // Microsoft documents -DisableWAM as the supported workaround for WAM-related
+            // sign-in issues. PSDefaultParameterValues keeps the backend script unchanged while
+            // making the normal interactive Microsoft sign-in use the non-WAM flow on Windows.
+            var escapedWorkerPath = workerPath.Replace("'", "''");
+            startInfo.ArgumentList.Add("-Command");
+            startInfo.ArgumentList.Add(
+                $"$PSDefaultParameterValues['Connect-ExchangeOnline:DisableWAM'] = $true; & '{escapedWorkerPath}'");
+        }
+        else
+        {
+            startInfo.ArgumentList.Add("-File");
+            startInfo.ArgumentList.Add(workerPath);
+        }
 
         try
         {
