@@ -1,106 +1,237 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="EntraMailSendRbac.Gui.MainWindow"
-        Title="Entra App – Mail.Send Shared Mailbox RBAC"
-        Width="900"
-        Height="800"
-        MinWidth="820"
+        Title="Mail.Send – Shared Mailbox RBAC"
+        Width="980"
+        Height="820"
+        MinWidth="900"
         MinHeight="720"
+        Background="#F5F7FA"
         WindowStartupLocation="CenterScreen">
 
-  <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
-    <Grid Margin="28" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" RowSpacing="14">
+  <Window.Styles>
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="19" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#172B4D" />
+    </Style>
 
-      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="16">
-        <StackPanel Grid.Column="0" Spacing="4">
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="#5E6C84" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#DFE4EA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="22" />
+    </Style>
+
+    <Style Selector="TextBox">
+      <Setter Property="MinHeight" Value="42" />
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BorderBrush" Value="#C7D0D9" />
+      <Setter Property="Background" Value="#FFFFFF" />
+    </Style>
+
+    <Style Selector="ComboBox">
+      <Setter Property="MinHeight" Value="38" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style Selector="Button">
+      <Setter Property="MinHeight" Value="42" />
+      <Setter Property="Padding" Value="16,9" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#0F6CBD" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#0F6CBD" />
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#EEF4FA" />
+      <Setter Property="Foreground" Value="#0F4C81" />
+      <Setter Property="BorderBrush" Value="#C8DBEE" />
+    </Style>
+
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#44546A" />
+      <Setter Property="BorderBrush" Value="#D5DCE5" />
+    </Style>
+  </Window.Styles>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid Margin="34" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="18">
+
+      <!-- Header -->
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="20">
+        <StackPanel Grid.Column="0" Spacing="5">
           <TextBlock x:Name="TitleText"
-                     Text="Entra App – Mail.Send auf eine Shared Mailbox beschränken"
-                     FontSize="24"
-                     FontWeight="SemiBold" />
+                     Text="Mail.Send – Shared Mailbox RBAC"
+                     FontSize="28"
+                     FontWeight="SemiBold"
+                     Foreground="#172B4D" />
           <TextBlock x:Name="SubtitleText"
-                     Text="Cross-Platform GUI · Exchange Online RBAC for Applications · Windows / macOS / Linux"
-                     Opacity="0.70" />
+                     Text="Microsoft Entra + Exchange Online · sicher auf eine Shared Mailbox begrenzen"
+                     Classes="muted" />
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Right">
-          <TextBlock x:Name="LanguageLabel" Text="Sprache" Opacity="0.70" />
-          <ComboBox x:Name="LanguageComboBox" SelectedIndex="0" Width="130">
+        <StackPanel Grid.Column="1" Spacing="5" HorizontalAlignment="Right">
+          <TextBlock x:Name="LanguageLabel" Text="Sprache" Classes="muted" HorizontalAlignment="Right" />
+          <ComboBox x:Name="LanguageComboBox" SelectedIndex="0" Width="140">
             <ComboBoxItem Content="Deutsch" />
             <ComboBoxItem Content="English" />
           </ComboBox>
         </StackPanel>
       </Grid>
 
+      <!-- Runtime -->
       <Border Grid.Row="1"
-              Padding="14"
-              CornerRadius="8"
+              Background="#EBF5FF"
+              BorderBrush="#B9D9F5"
               BorderThickness="1"
-              BorderBrush="#D7A000"
-              Background="#FFF8E1">
-        <StackPanel Spacing="5">
-          <TextBlock x:Name="SecurityHeadingText" Text="SICHERHEIT" FontWeight="Bold" Foreground="#7A5200" />
-          <TextBlock x:Name="SecurityBodyText"
-                     TextWrapping="Wrap"
-                     Foreground="#7A5200"
-                     Text="Für eine wirksame Exchange-RBAC-Begrenzung darf dieselbe App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen. Das Tool fragt niemals nach dem Admin-Kennwort; Anmeldung und MFA erfolgen ausschließlich über Microsoft." />
-        </StackPanel>
-      </Border>
-
-      <Border Grid.Row="2" Padding="12" CornerRadius="8" BorderThickness="1" BorderBrush="#D0D0D0">
-        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-          <TextBlock Grid.Column="0" x:Name="RuntimeLabel" Text="Laufzeit:" VerticalAlignment="Center" FontWeight="SemiBold" />
-          <TextBlock Grid.Column="1" x:Name="RuntimeStatusText" Text="PowerShell-Backend wird geprüft …" VerticalAlignment="Center" />
-          <Button Grid.Column="2" x:Name="RetryRuntimeButton" Content="Erneut prüfen" IsVisible="False" />
+              CornerRadius="10"
+              Padding="14,11">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+          <Border Width="10" Height="10" CornerRadius="5" Background="#22A06B" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock x:Name="RuntimeLabel" Text="System:" FontWeight="SemiBold" Foreground="#173B57" />
+            <TextBlock x:Name="RuntimeStatusText" Text="PowerShell-Backend wird geprüft …" Foreground="#355A73" />
+          </StackPanel>
+          <Button Grid.Column="2" x:Name="RetryRuntimeButton" Content="Erneut prüfen" Classes="ghost" IsVisible="False" MinHeight="34" />
         </Grid>
       </Border>
 
-      <Grid Grid.Row="3" ColumnDefinitions="190,*,Auto,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="6">
-        <TextBlock Grid.Row="0" Grid.Column="0" x:Name="AdminLabel" Text="1. Admin-Konto:" VerticalAlignment="Center" />
-        <TextBox Grid.Row="0" Grid.Column="1" x:Name="AdminTextBox" PlaceholderText="admin@firma.de" />
-        <Button Grid.Row="0" Grid.Column="2" x:Name="ConnectButton" Content="Microsoft Login" MinWidth="145" />
-        <Button Grid.Row="0" Grid.Column="3" x:Name="DeviceConnectButton" Content="Device Code" MinWidth="110" />
-        <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" x:Name="ConnectionStatusText" Text="Nicht verbunden" Foreground="#A40000" />
-      </Grid>
+      <!-- Step 1 -->
+      <Border Grid.Row="2" Classes="card">
+        <Grid ColumnDefinitions="52,*" ColumnSpacing="16">
+          <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#0F6CBD" VerticalAlignment="Top">
+            <TextBlock Text="1" Foreground="White" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
 
-      <Grid Grid.Row="4" ColumnDefinitions="190,*" ColumnSpacing="10">
-        <TextBlock Grid.Column="0" x:Name="AppIdLabel" Text="2. Application (Client) ID:" VerticalAlignment="Center" />
-        <TextBox Grid.Column="1" x:Name="AppIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-      </Grid>
+          <StackPanel Grid.Column="1" Spacing="14">
+            <StackPanel Spacing="3">
+              <TextBlock x:Name="Step1TitleText" Text="Mit Microsoft anmelden" Classes="sectionTitle" />
+              <TextBlock x:Name="Step1BodyText"
+                         Text="Die Anmeldung läuft direkt über Microsoft. MFA, Passkeys und Conditional Access bleiben vollständig erhalten."
+                         Classes="muted"
+                         TextWrapping="Wrap" />
+            </StackPanel>
 
-      <Grid Grid.Row="5" ColumnDefinitions="190,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="4">
-        <TextBlock Grid.Row="0" Grid.Column="0" x:Name="ObjectIdLabel" Text="3. Enterprise App Object ID:" VerticalAlignment="Center" />
-        <TextBox Grid.Row="0" Grid.Column="1" x:Name="ObjectIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="ObjectIdHintText" Opacity="0.65" TextWrapping="Wrap"
-                   Text="Wichtig: Object ID aus Entra ID → Enterprise applications verwenden, nicht die Object ID aus App registrations." />
-      </Grid>
+            <Grid ColumnDefinitions="180,*,Auto" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="7">
+              <TextBlock Grid.Row="0" Grid.Column="0" x:Name="AdminLabel" Text="Admin-Konto" VerticalAlignment="Center" Foreground="#334155" />
+              <TextBox Grid.Row="0" Grid.Column="1" x:Name="AdminTextBox" PlaceholderText="admin@firma.de" />
+              <Button Grid.Row="0" Grid.Column="2" x:Name="ConnectButton" Content="Mit Microsoft anmelden" Classes="primary" MinWidth="205" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                         x:Name="ConnectionStatusText"
+                         Text="Nicht verbunden"
+                         Foreground="#C9372C"
+                         FontWeight="SemiBold" />
+            </Grid>
+          </StackPanel>
+        </Grid>
+      </Border>
 
-      <Grid Grid.Row="6" ColumnDefinitions="190,*" ColumnSpacing="10">
-        <TextBlock Grid.Column="0" x:Name="MailboxLabel" Text="4. Shared Mailbox:" VerticalAlignment="Center" />
-        <TextBox Grid.Column="1" x:Name="MailboxTextBox" PlaceholderText="sharedmailbox@firma.de" />
-      </Grid>
+      <!-- Step 2 -->
+      <Border Grid.Row="3" Classes="card">
+        <Grid ColumnDefinitions="52,*" ColumnSpacing="16">
+          <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#6B778C" VerticalAlignment="Top">
+            <TextBlock Text="2" Foreground="White" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
 
-      <CheckBox Grid.Row="7"
-                x:Name="TenantMailSendCheckBox"
-                Margin="200,2,0,0"
-                Content="Ich bestätige: Tenantweites Microsoft Graph → Mail.Send (Application) ist für diese App entfernt bzw. nicht erteilt." />
+          <StackPanel Grid.Column="1" Spacing="15">
+            <StackPanel Spacing="3">
+              <TextBlock x:Name="Step2TitleText" Text="App und Shared Mailbox" Classes="sectionTitle" />
+              <TextBlock x:Name="Step2BodyText"
+                         Text="Trage die Entra-App und die Shared Mailbox ein, die Mail.Send erhalten soll."
+                         Classes="muted"
+                         TextWrapping="Wrap" />
+            </StackPanel>
 
-      <Grid Grid.Row="8" Margin="200,4,0,0" ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
-        <Button Grid.Column="0" x:Name="ConfigureButton" Content="Zugriff einrichten" MinWidth="165" />
-        <Button Grid.Column="1" x:Name="TestButton" Content="Zugriff testen" MinWidth="140" />
-        <Button Grid.Column="2" x:Name="DisconnectButton" Content="Verbindung trennen" MinWidth="150" />
-        <ProgressBar Grid.Column="3" x:Name="BusyProgress" IsIndeterminate="True" IsVisible="False" Height="6" VerticalAlignment="Center" />
-      </Grid>
+            <Grid ColumnDefinitions="210,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="12">
+              <TextBlock Grid.Row="0" Grid.Column="0" x:Name="AppIdLabel" Text="Application (Client) ID" VerticalAlignment="Center" Foreground="#334155" />
+              <TextBox Grid.Row="0" Grid.Column="1" x:Name="AppIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
 
-      <Grid Grid.Row="9" RowDefinitions="Auto,*" RowSpacing="6" MinHeight="230">
-        <TextBlock Grid.Row="0" x:Name="StatusLabel" Text="Status / Protokoll" FontWeight="SemiBold" />
-        <TextBox Grid.Row="1"
-                 x:Name="StatusTextBox"
-                 IsReadOnly="True"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 FontFamily="Menlo, Consolas, monospace" />
-      </Grid>
+              <TextBlock Grid.Row="1" Grid.Column="0" x:Name="ObjectIdLabel" Text="Enterprise App Object ID" VerticalAlignment="Center" Foreground="#334155" />
+              <TextBox Grid.Row="1" Grid.Column="1" x:Name="ObjectIdTextBox" PlaceholderText="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+
+              <TextBlock Grid.Row="2" Grid.Column="1" x:Name="ObjectIdHintText"
+                         Text="Object ID aus Entra ID → Enterprise applications verwenden, nicht aus App registrations."
+                         Classes="muted"
+                         TextWrapping="Wrap" />
+
+              <TextBlock Grid.Row="3" Grid.Column="0" x:Name="MailboxLabel" Text="Shared Mailbox" VerticalAlignment="Center" Foreground="#334155" />
+              <TextBox Grid.Row="3" Grid.Column="1" x:Name="MailboxTextBox" PlaceholderText="sharedmailbox@firma.de" />
+            </Grid>
+
+            <Border Background="#FFF7E6" BorderBrush="#F2C46D" BorderThickness="1" CornerRadius="9" Padding="14">
+              <StackPanel Spacing="7">
+                <TextBlock x:Name="SecurityHeadingText" Text="Sicherheitsprüfung" FontWeight="SemiBold" Foreground="#7A4D00" />
+                <TextBlock x:Name="SecurityBodyText"
+                           Text="Damit die Begrenzung wirklich gilt, darf diese App nicht zusätzlich tenantweit Microsoft Graph → Mail.Send (Application) besitzen."
+                           Foreground="#7A4D00"
+                           TextWrapping="Wrap" />
+                <CheckBox x:Name="TenantMailSendCheckBox"
+                          Content="Ich bestätige, dass tenantweites Mail.Send (Application) entfernt bzw. nicht erteilt ist."
+                          Foreground="#5B3A00" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- Step 3 + log -->
+      <Border Grid.Row="4" Classes="card">
+        <Grid ColumnDefinitions="52,*" ColumnSpacing="16">
+          <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#6B778C" VerticalAlignment="Top">
+            <TextBlock Text="3" Foreground="White" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+
+          <StackPanel Grid.Column="1" Spacing="14">
+            <StackPanel Spacing="3">
+              <TextBlock x:Name="Step3TitleText" Text="Zugriff einrichten und prüfen" Classes="sectionTitle" />
+              <TextBlock x:Name="Step3BodyText"
+                         Text="Die App erstellt den Exchange-RBAC-Scope und führt danach automatisch einen Sicherheitstest aus."
+                         Classes="muted"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
+              <Button Grid.Column="0" x:Name="ConfigureButton" Content="Zugriff einrichten" Classes="primary" MinWidth="175" />
+              <Button Grid.Column="1" x:Name="TestButton" Content="Zugriff testen" Classes="secondary" MinWidth="145" />
+              <Button Grid.Column="2" x:Name="DisconnectButton" Content="Abmelden" Classes="ghost" MinWidth="110" />
+              <ProgressBar Grid.Column="3" x:Name="BusyProgress" IsIndeterminate="True" IsVisible="False" Height="5" VerticalAlignment="Center" Margin="12,0,0,0" />
+            </Grid>
+
+            <Expander x:Name="LogExpander" IsExpanded="False">
+              <Expander.Header>
+                <TextBlock x:Name="StatusLabel" Text="Details anzeigen" Foreground="#44546A" FontWeight="SemiBold" />
+              </Expander.Header>
+              <Border Margin="0,10,0,0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                <TextBox x:Name="StatusTextBox"
+                         MinHeight="130"
+                         MaxHeight="220"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         FontFamily="Inter, Segoe UI, sans-serif"
+                         FontSize="12.5" />
+              </Border>
+            </Expander>
+          </StackPanel>
+        </Grid>
+      </Border>
 
     </Grid>
   </ScrollViewer>
